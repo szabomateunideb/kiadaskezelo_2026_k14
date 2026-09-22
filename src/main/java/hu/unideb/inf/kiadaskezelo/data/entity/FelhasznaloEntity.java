@@ -1,11 +1,19 @@
 package hu.unideb.inf.kiadaskezelo.data.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "FELHASZNALO")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class FelhasznaloEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,5 +31,9 @@ public class FelhasznaloEntity {
     private String email;
     @Column(name = "nem")
     private String nem;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "jogosultsag_id")
+    private JogEntity jog;
 
 }
