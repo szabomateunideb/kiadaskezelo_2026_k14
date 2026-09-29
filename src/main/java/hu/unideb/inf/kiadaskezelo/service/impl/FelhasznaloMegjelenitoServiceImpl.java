@@ -39,6 +39,6 @@ public class FelhasznaloMegjelenitoServiceImpl
                         f.getNev().equals(nev))
                 .findFirst().orElse(null);*/
 
-        return repo.findFelhasznaloEntityByNev(nev);
+        return null;
     }
 }
