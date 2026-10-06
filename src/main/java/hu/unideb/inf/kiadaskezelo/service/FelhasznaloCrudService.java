@@ -10,5 +10,5 @@ public interface FelhasznaloCrudService {
     FelhasznaloSaveDto findAll();
     void delete(FelhasznaloSaveDto dto);
     void deleteAll();
-    void deleteById(Long id;)
+    void deleteById(Long id);
 }

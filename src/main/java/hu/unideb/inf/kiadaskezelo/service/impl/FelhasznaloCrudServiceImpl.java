@@ -1,10 +1,20 @@
 package hu.unideb.inf.kiadaskezelo.service.impl;
 
+import hu.unideb.inf.kiadaskezelo.data.repository.FelhasznaloRepository;
 import hu.unideb.inf.kiadaskezelo.service.FelhasznaloCrudService;
 import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloSaveDto;
+import hu.unideb.inf.kiadaskezelo.service.mapper.FelhasznaloMapper;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@AllArgsConstructor
 public class FelhasznaloCrudServiceImpl
         implements FelhasznaloCrudService {
+
+    private final FelhasznaloRepository frepo;
+    private final FelhasznaloMapper fmapper;
+
     @Override
     public FelhasznaloSaveDto save(FelhasznaloSaveDto dto) {
         return null;
