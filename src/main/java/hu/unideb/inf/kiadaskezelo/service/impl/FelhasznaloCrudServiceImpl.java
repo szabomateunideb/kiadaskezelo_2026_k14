@@ -18,6 +18,8 @@ public class FelhasznaloCrudServiceImpl
 
     @Override
     public FelhasznaloSaveDto save(FelhasznaloSaveDto dto) {
+        System.out.println(dto.toString());
+        System.out.println(fmapper.felhasznaloSaveDtoToEntity(dto));
         FelhasznaloEntity e = frepo.save(
                 fmapper.felhasznaloSaveDtoToEntity(dto));
 
