@@ -17,4 +17,7 @@ public interface FelhasznaloMapper {
 
     @Mapping(target = "jog", ignore = true)
     FelhasznaloEntity felhasznaloSaveDtoToEntity(FelhasznaloSaveDto dto);
+
+    FelhasznaloSaveDto fEntityToSaveDto(FelhasznaloEntity felhasznaloEntity);
+
 }

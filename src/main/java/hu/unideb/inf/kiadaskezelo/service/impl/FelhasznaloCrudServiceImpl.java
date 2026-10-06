@@ -1,5 +1,6 @@
 package hu.unideb.inf.kiadaskezelo.service.impl;
 
+import hu.unideb.inf.kiadaskezelo.data.entity.FelhasznaloEntity;
 import hu.unideb.inf.kiadaskezelo.data.repository.FelhasznaloRepository;
 import hu.unideb.inf.kiadaskezelo.service.FelhasznaloCrudService;
 import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloSaveDto;
@@ -17,7 +18,10 @@ public class FelhasznaloCrudServiceImpl
 
     @Override
     public FelhasznaloSaveDto save(FelhasznaloSaveDto dto) {
-        return null;
+        FelhasznaloEntity e = frepo.save(
+                fmapper.felhasznaloSaveDtoToEntity(dto));
+
+        return fmapper.fEntityToSaveDto(e);
     }
 
     @Override
