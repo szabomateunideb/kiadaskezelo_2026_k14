@@ -20,13 +20,25 @@ public class FelhasznaloCrudController {
         return cService.save(dto);
     }
 
-    @GetMapping
+    /*@GetMapping
     List<FelhasznaloSaveDto> findAll() {
         return cService.findAll();
     }
 
-    FelhasznaloSaveDto findByNev(String nev){
-        return null;
+    @GetMapping
+    FelhasznaloSaveDto findByNev(@RequestParam String nev){
+        return cService.findByNev(nev);
+    }*/
+
+    @GetMapping
+    List<FelhasznaloSaveDto> findAllByNev(
+            @RequestParam(required = false) String nev){
+        System.out.println("Nev: " + nev);
+        if(nev == null){
+            return cService.findAll();
+        } else {
+            return List.of(cService.findByNev(nev));
+        }
     }
 
     FelhasznaloSaveDto update(@RequestBody FelhasznaloSaveDto dto) {

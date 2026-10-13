@@ -7,6 +7,9 @@ import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloSaveDto;
 import hu.unideb.inf.kiadaskezelo.service.mapper.FelhasznaloMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.cfg.MapperBuilder;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -33,12 +36,14 @@ public class FelhasznaloCrudServiceImpl
 
     @Override
     public FelhasznaloSaveDto findByNev(String nev) {
-        return null;
+        FelhasznaloEntity e =frepo.findFelhasznaloEntityByNev(nev);
+
+        return fmapper.fEntityToSaveDto(e);
     }
 
     @Override
-    public FelhasznaloSaveDto findAll() {
-        return null;
+    public List<FelhasznaloSaveDto> findAll() {
+        return fmapper.fEntityListToSaveDtoList(frepo.findAll());
     }
 
     @Override

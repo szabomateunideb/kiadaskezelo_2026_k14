@@ -19,5 +19,6 @@ public interface FelhasznaloMapper {
     FelhasznaloEntity felhasznaloSaveDtoToEntity(FelhasznaloSaveDto dto);
 
     FelhasznaloSaveDto fEntityToSaveDto(FelhasznaloEntity felhasznaloEntity);
-
+    List<FelhasznaloSaveDto> fEntityListToSaveDtoList(
+            List<FelhasznaloEntity> felhasznaloEntities);
 }
