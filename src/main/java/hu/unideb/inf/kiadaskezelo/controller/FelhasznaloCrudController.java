@@ -50,8 +50,9 @@ public class FelhasznaloCrudController {
                 .orElse(null);
     }
 
+    @PutMapping
     FelhasznaloSaveDto update(@RequestBody FelhasznaloSaveDto dto) {
-        return null;
+        return cService.update(dto);
     }
 
     void deleteById(Long id){}
