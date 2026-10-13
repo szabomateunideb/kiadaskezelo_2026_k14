@@ -41,6 +41,15 @@ public class FelhasznaloCrudController {
         }
     }
 
+    @GetMapping("/{id}")
+    FelhasznaloSaveDto findOneById(@PathVariable Long id){
+        return cService.findAll()
+                .stream()
+                .filter(f -> f.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
     FelhasznaloSaveDto update(@RequestBody FelhasznaloSaveDto dto) {
         return null;
     }
