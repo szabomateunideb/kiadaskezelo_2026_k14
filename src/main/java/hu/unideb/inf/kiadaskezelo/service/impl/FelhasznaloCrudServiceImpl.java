@@ -8,6 +8,7 @@ import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloSaveDto;
 import hu.unideb.inf.kiadaskezelo.service.mapper.FelhasznaloMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import tools.jackson.databind.cfg.MapperBuilder;
 
 import java.util.List;
@@ -55,16 +56,16 @@ public class FelhasznaloCrudServiceImpl
 
     @Override
     public void delete(FelhasznaloSaveDto dto) {
-
+        frepo.delete(fmapper.felhasznaloSaveDtoToEntity(dto));
     }
 
     @Override
     public void deleteAll() {
-
+        frepo.deleteAll();
     }
 
     @Override
     public void deleteById(Long id) {
-
+        frepo.deleteById(id);
     }
 }

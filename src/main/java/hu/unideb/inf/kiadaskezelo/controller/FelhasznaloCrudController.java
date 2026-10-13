@@ -4,6 +4,8 @@ import hu.unideb.inf.kiadaskezelo.data.entity.FelhasznaloEntity;
 import hu.unideb.inf.kiadaskezelo.service.FelhasznaloCrudService;
 import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloSaveDto;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -55,8 +57,15 @@ public class FelhasznaloCrudController {
         return cService.update(dto);
     }
 
-    void deleteById(Long id){}
-    void delete(FelhasznaloSaveDto dto){}
-    void deleteAll(){}
+    @DeleteMapping("/{id}")
+    void deleteById(@PathVariable Long id){cService.deleteById(id);}
+    @DeleteMapping
+    ResponseEntity delete(@RequestBody FelhasznaloSaveDto dto){
+        cService.delete(dto);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+    @DeleteMapping("/felhasznalok")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteAll(){ cService.deleteAll();}
 
 }
