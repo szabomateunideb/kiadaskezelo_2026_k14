@@ -1,0 +1,118 @@
+@host = http://localhost:9090
+# Friss, mintaadatokkal indított adatbázisban Anna: 2; HUF bankszámla: 2; készpénz: 1.
+# Az azonosítókat a listákból, a dátumot a számlanyitás és a jelen közé állítsd.
+@felhasznaloId = 2
+@szamlaId = 2
+@celSzamlaId = 1
+@kategoriaId = 1
+@datum = 2026-10-26T08:00:00Z
+@penzmozgasId = 31
+@ismetlesId = 4
+
+### Felhasználók
+GET {{host}}/api/felhasznalo?size=20
+
+### Számlák aktuális egyenlegekkel
+GET {{host}}/api/felhasznalok/{{felhasznaloId}}/szamlak
+
+### Kategóriák és saját hozzárendelések
+GET {{host}}/api/felhasznalok/{{felhasznaloId}}/kategoriak
+
+### Kártyák
+GET {{host}}/api/felhasznalok/{{felhasznaloId}}/kartyak
+
+### Tervezett kiadás létrehozása; a válaszból másold ki a penzmozgasId értékét
+POST {{host}}/api/felhasznalok/{{felhasznaloId}}/penzmozgasok
+Content-Type: application/json
+
+{
+  "szamlaId": {{szamlaId}},
+  "kategoriaId": {{kategoriaId}},
+  "tipus": "KIADAS",
+  "osszeg": 2500,
+  "datum": "{{datum}}",
+  "allapot": "TERVEZETT",
+  "megnevezes": "Próba bevásárlás"
+}
+
+### Könyvelés; ismételt hívás sem terheli újra
+POST {{host}}/api/felhasznalok/{{felhasznaloId}}/penzmozgasok/{{penzmozgasId}}/konyveles
+
+### Szűrt, lapozott pénzmozgások
+GET {{host}}/api/felhasznalok/{{felhasznaloId}}/penzmozgasok?szamlaId={{szamlaId}}&allapot=KONYVELT&size=10&sort=datum,desc
+
+### Saját számlák közötti átvezetés
+POST {{host}}/api/felhasznalok/{{felhasznaloId}}/atvezetesek
+Content-Type: application/json
+
+{
+  "forrasSzamlaId": {{szamlaId}},
+  "celSzamlaId": {{celSzamlaId}},
+  "osszeg": 5000,
+  "celOsszeg": 5000,
+  "datum": "{{datum}}",
+  "allapot": "KONYVELT",
+  "megnevezes": "Készpénzfelvétel"
+}
+
+### Külső utalás helyi rögzítése
+POST {{host}}/api/felhasznalok/{{felhasznaloId}}/utalasok
+Content-Type: application/json
+
+{
+  "penzmozgas": {
+    "szamlaId": {{szamlaId}},
+    "kategoriaId": 2,
+    "tipus": "KIADAS",
+    "osszeg": 6000,
+    "datum": "{{datum}}",
+    "allapot": "KONYVELT",
+    "megnevezes": "Minta rezsi"
+  },
+  "partnerNev": "Minta szolgáltató",
+  "partnerIban": "HU00000000000000000000000999",
+  "kozlemeny": "Órai próba"
+}
+
+### Sztornó; a korábbi kiadás egyenleghatása megszűnik
+POST {{host}}/api/felhasznalok/{{felhasznaloId}}/penzmozgasok/{{penzmozgasId}}/sztorno
+
+### Ismétlődés létrehozása; a válaszból másold ki az ismetlesId értékét
+POST {{host}}/api/felhasznalok/{{felhasznaloId}}/ismetlesek
+Content-Type: application/json
+
+{
+  "szamlaId": {{szamlaId}},
+  "kategoriaId": {{kategoriaId}},
+  "megnevezes": "Havi próba",
+  "osszeg": 10000,
+  "gyakorisag": "HONAP",
+  "intervallum": 1,
+  "kezdoDatum": "2026-10-26"
+}
+
+### Esedékes előfordulások kézi létrehozása
+POST {{host}}/api/felhasznalok/{{felhasznaloId}}/ismetlesek/{{ismetlesId}}/feldolgozas
+
+### Statisztika, külön pénznemenként
+GET {{host}}/api/felhasznalok/{{felhasznaloId}}/statisztika?tol=2026-10-01&ig=2026-10-31
+
+### Kalkuláció mentés nélkül
+POST {{host}}/api/megtakaritas-kalkulator
+Content-Type: application/json
+
+{
+  "nev": "Vésztartalék",
+  "penznem": "HUF",
+  "kezdoToke": 100000,
+  "haviBefizetes": 30000,
+  "evesKamatSzazalek": 4.5,
+  "futamidoHonap": 24,
+  "celosszeg": 1000000
+}
+
+### Mentett megtakarítási tervek
+GET {{host}}/api/felhasznalok/{{felhasznaloId}}/megtakaritasok
+
+### Jogosultság törzsadatok
+GET {{host}}/api/jogosultsagok
