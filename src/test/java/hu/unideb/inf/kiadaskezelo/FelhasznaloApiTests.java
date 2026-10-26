@@ -153,6 +153,8 @@ class FelhasznaloApiTests {
         jog = jogRepository.saveAndFlush(jog);
         FelhasznaloEntity entity = repository.findById(id).orElseThrow();
         entity.setJog(jog);
+        entity.setAktiv(false);
+        entity.setEmailEllenorizve(true);
         repository.saveAndFlush(entity);
 
         mvc.perform(put(API + "/" + id).contentType(MediaType.APPLICATION_JSON)
@@ -166,6 +168,8 @@ class FelhasznaloApiTests {
         assertThat(saved.getNev()).isEqualTo("Új név");
         assertThat(saved.getJelszo()).isEqualTo("tesztjelszo");
         assertThat(saved.getJog().getId()).isEqualTo(jog.getId());
+        assertThat(saved.isAktiv()).isFalse();
+        assertThat(saved.isEmailEllenorizve()).isTrue();
         assertThat(repository.count()).isEqualTo(1);
     }
 

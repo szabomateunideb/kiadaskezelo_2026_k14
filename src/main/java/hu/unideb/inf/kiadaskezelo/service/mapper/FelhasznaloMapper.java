@@ -17,10 +17,14 @@ public interface FelhasznaloMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "jog", ignore = true)
+    @Mapping(target = "aktiv", ignore = true)
+    @Mapping(target = "emailEllenorizve", ignore = true)
     FelhasznaloEntity toEntity(FelhasznaloCreateRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "jog", ignore = true)
     @Mapping(target = "jelszo", ignore = true)
+    @Mapping(target = "aktiv", ignore = true)
+    @Mapping(target = "emailEllenorizve", ignore = true)
     void updateEntity(FelhasznaloUpdateRequest request, @MappingTarget FelhasznaloEntity entity);
 }

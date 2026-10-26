@@ -26,6 +26,9 @@ public interface FelhasznaloRepository extends JpaRepository<FelhasznaloEntity, 
 
     boolean existsByEmail(String email);
 
+    @EntityGraph(attributePaths = "jog")
+    Optional<FelhasznaloEntity> findByFelhasznalonev(String felhasznalonev);
+
     boolean existsByFelhasznalonev(String felhasznalonev);
 
     boolean existsByEmailAndIdNot(String email, Long id);

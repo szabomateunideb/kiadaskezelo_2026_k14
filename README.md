@@ -1,7 +1,9 @@
 # Kiadáskezelő – backend órai mintaprojekt
 
 Java 25, Spring Boot 4.1.1, Spring MVC, Spring Data JPA, MapStruct és H2.
-A jelenlegi példák a felhasználókezelésen mutatják be a backend működését.
+A REST-példák a felhasználókezelésen mutatják be a backend működését.
+A pénzügyi domain entitásai és repositoryjai is rendelkezésre állnak, az adatbázist
+induláskor automatikus mintaadat-feltöltő készíti elő az órai feladatokhoz.
 
 ## Indítás és tesztek
 
@@ -207,3 +209,126 @@ segítségével a lekérdezések szövege is megfigyelhető.
 - Két párhuzamos, azonos e-mailes létrehozásnál egy `201` és egy `409` választ.
 - A lapozást, rendezést, névszűrést, üres találatot és oldalméretkorlátot.
 - A `204` törlést és az N+1 megszüntetését a valós adatbázis-lekérdezések számával.
+
+## Pénzügyi domain: táblák, entitások, repositoryk
+
+A fotón megtervezett nyolc tábla megmaradt. Az ismétlődésekhez és a mentett
+kalkulátortervekhez két kiegészítő tábla került be.
+
+| Tábla | Entitás | Repository |
+| --- | --- | --- |
+| `FELHASZNALO` | `FelhasznaloEntity` | `FelhasznaloRepository` |
+| `JOGOSULTSAG` | `JogEntity` | `JogRepository` |
+| `FELH_KATEGORIA` | `FelhKategoriaEntity` | `FelhKategoriaRepository` |
+| `KATEGORIA` | `KategoriaEntity` | `KategoriaRepository` |
+| `SZAMLA` | `SzamlaEntity` | `SzamlaRepository` |
+| `KARTYA` | `KartyaEntity` | `KartyaRepository` |
+| `PENZMOZGAS` | `PenzmozgasEntity` | `PenzmozgasRepository` |
+| `UTALAS` | `UtalasEntity` | `UtalasRepository` |
+| `ISMETLODO_PENZMOZGAS` | `IsmetlodoPenzmozgasEntity` | `IsmetlodoPenzmozgasRepository` |
+| `MEGTAKARITASI_TERV` | `MegtakaritasiTervEntity` | `MegtakaritasiTervRepository` |
+
+Az `AuditEntity` közös `@MappedSuperclass`, nem külön tábla. A `@PrePersist`
+és `@PreUpdate` automatikusan kezeli a `letrehozva` és `modositva` időbélyegeket.
+A `FelhKategoriaId` `@Embeddable` kulcs, a kapcsolótábla `@EmbeddedId` és
+`@MapsId` segítségével hivatkozik a felhasználóra és a kategóriára.
+
+A kapcsolatok a hivatkozást birtokló oldalon szerepelnek, `LAZY` betöltéssel.
+Nincs automatikus törlési kaszkád, amely egy felhasználó vagy számla törlésekor
+észrevétlenül eltávolítaná a pénzügyi előzményeket. A hivatkozott rekord törlését
+az idegen kulcs megakadályozza; archiváláshoz a meglévő `aktiv` mezők használhatók.
+
+A típusok és állapotok `@Enumerated(EnumType.STRING)` mezők. A pénzösszegek
+`BigDecimal` típusúak, `DECIMAL(19,4)` oszlopban. A pozitív összegeket,
+az ismétlési intervallumot, a kártya lejárati hónapját és a célösszeg szükségességét
+Bean Validation, illetve JPA `@CheckConstraint` adatbázis-kényszerek is védik.
+Az `UTALAS.penzmozg_id` egyedi; egy pénzmozgáshoz legfeljebb egy utalási rekord tartozik.
+Az `(ismetles_id, esedekesseg)` egyedi kulcs megakadályozza egy ismétlődés duplázását.
+
+A `SZAMLA` tárolja a nyitóegyenleget és a pénznemet. A kártya ehhez kapcsolódik,
+nem tart fenn külön egyenleget. Saját átvezetéskor a `PENZMOZGAS` adja a
+forrásszámlát és összeget, az `UTALAS` a célszámlát és annak pénznemében a célösszeget.
+Külső utalásnál saját célszámla helyett partneradatok szerepelnek.
+
+A repositoryk tulajdonos szerinti, lapozott és időszakos lekérdezési példákat is
+tartalmaznak. A `PenzmozgasRepository.findInPeriod` kezdő időpontja inkluzív,
+végpontja exkluzív: `[tol, ig)`. A pénzmozgás listáihoz és az esedékes ütemezésekhez
+`@EntityGraph` biztosítja a szükséges kapcsolatok betöltését.
+
+Az új pénzügyi táblákhoz jelenleg entitások és repositoryk tartoznak. Az üzleti
+műveletek service- és REST-rétege további órai feladat: ide tartozik például az
+aktuális egyenleg számítása, az átvezetés végrehajtása, a kategória tulajdonoshoz
+rendelésének ellenőrzése, az esedékes ismétlődések feldolgozása és a kalkuláció.
+
+## Automatikus mintaadat-feltöltés
+
+A `bootstrap/DemoAdatFeltolto.java` egy `CommandLineRunner`: az alkalmazás
+elindulásakor, a Hibernate sémalétrehozása után automatikusan lefut.
+A repositorykat használja, ezért a kapcsolatokat valódi generált azonosítókkal hozza létre.
+A teljes feltöltés egy tranzakció; hiba esetén minden létrehozott adat visszagördül.
+
+Alapértelmezésben engedélyezett:
+
+```properties
+app.demo-data.enabled=true
+```
+
+Kikapcsolható `app.demo-data.enabled=false` beállítással, az
+`APP_DEMO_DATA_ENABLED=false` környezeti változóval, vagy futtatási paraméterrel:
+
+```powershell
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--app.demo-data.enabled=false"
+```
+
+Ha már van felhasználó az adatbázisban, a teljes feltöltés kimarad. A feltöltő
+nem töröl, nem ír felül felhasználói adatot, és ismételt meghívása nem dupláz.
+A jelenlegi `create-drop` és memóriabeli H2 miatt rendes újraindításkor az adatbázis
+újra létrejön, így a bemutatóadatok is újra elkészülnek.
+
+| Adat | Darabszám |
+| --- | ---: |
+| Jogosultság | 2 |
+| Felhasználó | 4 |
+| Kategória | 8 |
+| Felhasználó–kategória kapcsolat | 24 |
+| Számla | 9 |
+| Kártya | 4 |
+| Pénzmozgás | 30 |
+| Utalás / saját átvezetés | 9 |
+| Ismétlődő ütemezés | 3 |
+| Megtakarítási terv | 2 |
+
+Felhasználók: `demo_admin`, `demo_anna`, `demo_bela`, `demo_csilla`.
+A három normál felhasználónak fejenként készpénzes, HUF és EUR bankszámlája van.
+Annának két kártyája kapcsolódik ugyanahhoz a forintszámlához.
+Az e-mail-címek `example.test` végződésűek; az IBAN-ok szándékosan kitaláltak.
+A kártyákból kizárólag azonosító metaadatokat tárolunk, teljes kártyaszám, CVV és PIN nélkül.
+A demo felhasználók előre rögzített bcrypt-hasht kapnak; ez nem vezet be bejelentkezési funkciót.
+
+A minták között szerepel munkabér, kártyás és készpénzes vásárlás, készpénzfelvétel,
+forint–euró átvezetés rögzített bemutatóarány mellett, külső utalás, tervezett és
+sztornózott kiadás. A havi albérlethez, előfizetéshez és ösztöndíjhoz két-két korábbi
+előfordulás és egy következő esedékesség tartozik. A dátumok az indítás napjához
+igazodnak, `Europe/Budapest` időzónával; az adatbázis időpontjai `Instant` értékek.
+A feltöltő mintarekordokat hoz létre, banki utalást nem indít, és nem futtat időzítőt.
+
+Például a H2 konzolban:
+
+```sql
+SELECT f.felhasznalonev, s.nev, s.penznem, s.nyito_egyenleg
+FROM SZAMLA s
+JOIN FELHASZNALO f ON f.id = s.felh_id
+ORDER BY f.felhasznalonev, s.id;
+
+SELECT p.id, s.nev AS szamla, p.tipus, p.osszeg, s.penznem,
+       p.megnevezes, p.allapot, k.nev AS kategoria
+FROM PENZMOZGAS p
+JOIN SZAMLA s ON s.id = p.szamla_id
+LEFT JOIN KATEGORIA k ON k.id = p.kat_id
+ORDER BY p.datum, p.id;
+```
+
+A `test` profilban a feltöltés ki van kapcsolva, hogy a meglévő API-tesztek tiszta
+adatbázissal dolgozhassanak. A `DomainPersistenceTests` külön visszakapcsolja,
+és ellenőrzi az induláskori feltöltést, az ismételt futtatást, a kapcsolatok
+helyességét, a repository-lekérdezéseket és a fontos adatbázis-kényszereket.

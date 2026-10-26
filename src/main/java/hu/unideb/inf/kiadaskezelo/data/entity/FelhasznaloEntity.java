@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FelhasznaloEntity {
+public class FelhasznaloEntity extends AuditEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,12 +28,18 @@ public class FelhasznaloEntity {
     private LocalDate szuletesiDatum;
     @Column(name = "felhasznalonev", nullable = false, length = 60)
     private String felhasznalonev;
-    @Column(name = "jelszo", nullable = false, length = 100)
+    @Column(name = "jelszo", nullable = false, length = 255)
     private String jelszo;
     @Column(name = "email", nullable = false, length = 254)
     private String email;
     @Column(name = "nem", length = 10)
     private String nem;
+
+    @Column(nullable = false)
+    private boolean aktiv = true;
+
+    @Column(name = "email_ellenorizve", nullable = false)
+    private boolean emailEllenorizve;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jogosultsag_id")
