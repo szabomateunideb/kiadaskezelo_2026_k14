@@ -1,30 +1,47 @@
 package hu.unideb.inf.kiadaskezelo.data.repository;
 
 import hu.unideb.inf.kiadaskezelo.data.entity.FelhasznaloEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 
-@Repository
-public interface FelhasznaloRepository extends
-        JpaRepository<FelhasznaloEntity,Long> {
+import java.util.List;
+import java.util.Optional;
 
-    FelhasznaloEntity findFelhasznaloEntityByNev(String felhasznaloNev);
+public interface FelhasznaloRepository extends JpaRepository<FelhasznaloEntity, Long> {
 
-    FelhasznaloEntity findAllByNemEmpty();
+    @Override
+    @EntityGraph(attributePaths = "jog")
+    Page<FelhasznaloEntity> findAll(Pageable pageable);
 
-    //Select * from felhasznalo inner join jog
-    //on jog_id = id
-    //wher jog.nev = jogNev
-    FelhasznaloEntity findAllByJog_Nev(String jogNev);
+    @EntityGraph(attributePaths = "jog")
+    Page<FelhasznaloEntity> findAllByNevContainingIgnoreCase(String nev, Pageable pageable);
 
-    @Query("SELECT f FROM FelhasznaloEntity f WHERE f.nem = ?1 " +
-            "and f.jog.nev='FELHASZNALO'")
-    FelhasznaloEntity findByJPQL(String nem);
+    @Override
+    @EntityGraph(attributePaths = "jog")
+    Optional<FelhasznaloEntity> findById(Long id);
 
-    @Query(value = "SELECT * FROM FELHASZNALO f where f.nev =?1"
-            , nativeQuery = true)
-    FelhasznaloEntity findByNative(String nem);
+    boolean existsByEmail(String email);
 
+    boolean existsByFelhasznalonev(String felhasznalonev);
 
+    boolean existsByEmailAndIdNot(String email, Long id);
+
+    boolean existsByFelhasznalonevAndIdNot(String felhasznalonev, Long id);
+
+    // További órai példák: a név és a jogosultság nem egyedi, ezért a visszatérés lista.
+    List<FelhasznaloEntity> findAllByNev(String nev);
+
+    List<FelhasznaloEntity> findAllByNem(String nem);
+
+    List<FelhasznaloEntity> findAllByJog_Nev(String jogNev);
+
+    @Query("SELECT f FROM FelhasznaloEntity f WHERE f.nem = :nem AND f.jog.nev = 'FELHASZNALO'")
+    List<FelhasznaloEntity> findByJPQL(@Param("nem") String nem);
+
+    @Query(value = "SELECT * FROM FELHASZNALO f WHERE f.nev = :nev", nativeQuery = true)
+    List<FelhasznaloEntity> findByNative(@Param("nev") String nev);
 }

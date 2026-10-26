@@ -1,74 +1,65 @@
 package hu.unideb.inf.kiadaskezelo.controller;
 
-import hu.unideb.inf.kiadaskezelo.data.entity.FelhasznaloEntity;
 import hu.unideb.inf.kiadaskezelo.service.FelhasznaloCrudService;
-import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloSaveDto;
+import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloCreateRequest;
+import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloResponse;
+import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloUpdateRequest;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.List;
+import java.net.URI;
 
 @RestController
-@RequestMapping("api/felhasznalo")
-@AllArgsConstructor
+@RequestMapping("/api/felhasznalo")
+@RequiredArgsConstructor
 public class FelhasznaloCrudController {
 
     private final FelhasznaloCrudService cService;
 
     @PostMapping
-    FelhasznaloSaveDto save(@Valid
-                            @RequestBody FelhasznaloSaveDto dto) {
-        return cService.save(dto);
+    public ResponseEntity<FelhasznaloResponse> save(@Valid @RequestBody FelhasznaloCreateRequest request) {
+        FelhasznaloResponse response = cService.save(request);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}").buildAndExpand(response.id()).toUri();
+        return ResponseEntity.created(location).body(response);
     }
 
-    /*@GetMapping
-    List<FelhasznaloSaveDto> findAll() {
-        return cService.findAll();
-    }
-
-    @GetMapping
-    FelhasznaloSaveDto findByNev(@RequestParam String nev){
-        return cService.findByNev(nev);
-    }*/
-
-    @GetMapping
-    List<FelhasznaloSaveDto> findAllByNev(
-            @RequestParam(required = false) String nev){
-        System.out.println("Nev: " + nev);
-        if(nev == null){
-            return cService.findAll();
-        } else {
-            return List.of(cService.findByNev(nev));
-        }
+    @GetMapping({"", "/felhasznalok"})
+    public Page<FelhasznaloResponse> findAllByNev(
+            @RequestParam(required = false) @Size(max = 100) String nev,
+            @PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        return cService.findAll(nev, pageable);
     }
 
     @GetMapping("/{id}")
-    FelhasznaloSaveDto findOneById(@PathVariable Long id){
-        return cService.findAll()
-                .stream()
-                .filter(f -> f.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+    public FelhasznaloResponse findOneById(@PathVariable @Positive Long id) {
+        return cService.findById(id);
     }
 
-    @PutMapping
-    FelhasznaloSaveDto update(@Valid
-                              @RequestBody FelhasznaloSaveDto dto) {
-        return cService.update(dto);
+    @PutMapping("/{id}")
+    public FelhasznaloResponse update(@PathVariable @Positive Long id,
+                                      @Valid @RequestBody FelhasznaloUpdateRequest request) {
+        return cService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    void deleteById(@PathVariable Long id){cService.deleteById(id);}
-    @DeleteMapping
-    ResponseEntity delete(@RequestBody FelhasznaloSaveDto dto){
-        cService.delete(dto);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteById(@PathVariable @Positive Long id) {
+        cService.deleteById(id);
     }
+
     @DeleteMapping("/felhasznalok")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteAll(){ cService.deleteAll();}
-
+    public void deleteAll() {
+        cService.deleteAll();
+    }
 }

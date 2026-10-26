@@ -9,7 +9,10 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "FELHASZNALO")
+@Table(name = "FELHASZNALO", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_felhasznalo_email", columnNames = "email"),
+        @UniqueConstraint(name = "uk_felhasznalo_felhasznalonev", columnNames = "felhasznalonev")
+})
 @Getter
 @Setter
 @AllArgsConstructor
@@ -19,20 +22,20 @@ public class FelhasznaloEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nev", nullable = false)
+    @Column(name = "nev", nullable = false, length = 100)
     private String nev;
     @Column(name = "szulDat", nullable = false)
     private LocalDate szuletesiDatum;
-    @Column(name = "felhasznalonev", nullable = false, length = 60, unique = true)
+    @Column(name = "felhasznalonev", nullable = false, length = 60)
     private String felhasznalonev;
-    @Column(name = "jelszo", nullable = false)
+    @Column(name = "jelszo", nullable = false, length = 100)
     private String jelszo;
-    @Column(name = "email",  nullable = false, unique = true)
+    @Column(name = "email", nullable = false, length = 254)
     private String email;
-    @Column(name = "nem")
+    @Column(name = "nem", length = 10)
     private String nem;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jogosultsag_id")
     private JogEntity jog;
 

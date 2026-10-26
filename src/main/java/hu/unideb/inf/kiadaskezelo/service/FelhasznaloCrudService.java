@@ -1,16 +1,17 @@
 package hu.unideb.inf.kiadaskezelo.service;
 
-import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloSaveDto;
-
-import java.util.List;
+import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloCreateRequest;
+import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloResponse;
+import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloUpdateRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface FelhasznaloCrudService {
 
-    FelhasznaloSaveDto save(FelhasznaloSaveDto dto);
-    FelhasznaloSaveDto update(FelhasznaloSaveDto dto);
-    FelhasznaloSaveDto findByNev(String nev);
-    List<FelhasznaloSaveDto> findAll();
-    void delete(FelhasznaloSaveDto dto);
+    FelhasznaloResponse save(FelhasznaloCreateRequest request);
+    FelhasznaloResponse update(Long id, FelhasznaloUpdateRequest request);
+    FelhasznaloResponse findById(Long id);
+    Page<FelhasznaloResponse> findAll(String nev, Pageable pageable);
     void deleteAll();
     void deleteById(Long id);
 }
