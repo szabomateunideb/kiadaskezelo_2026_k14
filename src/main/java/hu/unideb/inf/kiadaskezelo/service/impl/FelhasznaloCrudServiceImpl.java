@@ -93,6 +93,12 @@ public class FelhasznaloCrudServiceImpl implements FelhasznaloCrudService {
         return frepo.findById(id).orElseThrow(() -> new FelhasznaloNotFoundException(id));
     }
 
+    @Override
+    @Transactional
+    public void aktiv(Long id, boolean aktiv) {
+        keresIdAlapjan(id).setAktiv(aktiv);
+    }
+
     private void ellenorizEgyediseget(String email, String felhasznalonev, Long id) {
         boolean emailFoglalt = id == null
                 ? frepo.existsByEmail(email) : frepo.existsByEmailAndIdNot(email, id);

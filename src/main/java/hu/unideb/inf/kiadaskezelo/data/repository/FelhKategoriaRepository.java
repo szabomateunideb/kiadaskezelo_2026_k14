@@ -8,6 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface FelhKategoriaRepository extends JpaRepository<FelhKategoriaEntity, FelhKategoriaId> {
+
+    @EntityGraph(attributePaths = "kategoria")
+    List<FelhKategoriaEntity> findAllByFelhasznalo_Id(Long owner);
+    boolean existsByKategoria_Id(Long id);
     @EntityGraph(attributePaths = "kategoria")
     List<FelhKategoriaEntity> findAllByFelhasznalo_IdAndAktivTrue(Long felhasznaloId);
 

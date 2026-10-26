@@ -25,6 +25,13 @@ public class FelhasznaloCrudController {
 
     private final FelhasznaloCrudService cService;
 
+    @PatchMapping("/{id}/aktiv")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void aktiv(@PathVariable @Positive Long id,
+            @Valid @RequestBody hu.unideb.inf.kiadaskezelo.service.dto.domain.AktivRequest request) {
+        cService.aktiv(id, request.aktiv());
+    }
+
     @PostMapping
     public ResponseEntity<FelhasznaloResponse> save(@Valid @RequestBody FelhasznaloCreateRequest request) {
         FelhasznaloResponse response = cService.save(request);

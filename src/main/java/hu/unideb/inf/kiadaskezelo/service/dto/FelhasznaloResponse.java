@@ -9,6 +9,8 @@ public record FelhasznaloResponse(
         String felhasznalonev,
         String email,
         String nem,
-        String jogNev
+        String jogNev,
+        boolean aktiv,
+        boolean emailEllenorizve
 ) {
 }

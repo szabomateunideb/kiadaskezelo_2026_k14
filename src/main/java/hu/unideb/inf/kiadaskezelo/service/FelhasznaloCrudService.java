@@ -14,4 +14,5 @@ public interface FelhasznaloCrudService {
     Page<FelhasznaloResponse> findAll(String nev, Pageable pageable);
     void deleteAll();
     void deleteById(Long id);
+    void aktiv(Long id, boolean aktiv);
 }

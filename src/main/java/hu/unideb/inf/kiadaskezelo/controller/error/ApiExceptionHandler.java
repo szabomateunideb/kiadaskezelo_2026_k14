@@ -3,6 +3,11 @@ package hu.unideb.inf.kiadaskezelo.controller.error;
 import hu.unideb.inf.kiadaskezelo.service.exception.FelhasznaloNotFoundException;
 import hu.unideb.inf.kiadaskezelo.service.exception.FoglaltFelhasznaloAdatException;
 import hu.unideb.inf.kiadaskezelo.service.exception.HibasKeresException;
+import hu.unideb.inf.kiadaskezelo.service.exception.ErforrasNotFoundException;
+import hu.unideb.inf.kiadaskezelo.service.exception.UzletiSzabalyException;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +33,37 @@ import java.util.List;
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @ExceptionHandler(java.time.DateTimeException.class)
+    public ProblemDetail handleInvalidDate(java.time.DateTimeException exception) {
+        return problem(HttpStatus.BAD_REQUEST, "hibas-datum", "Érvénytelen dátum",
+                "A dátum kívül esik a támogatott tartományon.");
+    }
+
+    @ExceptionHandler(ErforrasNotFoundException.class)
+    public ProblemDetail handleMissingResource(ErforrasNotFoundException exception) {
+        return problem(HttpStatus.NOT_FOUND, "nem-talalhato", "Nem található", exception.getMessage());
+    }
+
+    @ExceptionHandler(UzletiSzabalyException.class)
+    public ProblemDetail handleBusinessConflict(UzletiSzabalyException exception) {
+        return problem(HttpStatus.CONFLICT, "uzleti-utkozes", "A művelet nem hajtható végre", exception.getMessage());
+    }
+
+    @ExceptionHandler({PessimisticLockingFailureException.class, ObjectOptimisticLockingFailureException.class})
+    public ProblemDetail handleConcurrentChange(Exception exception) {
+        return problem(HttpStatus.CONFLICT, "parhuzamos-modositas", "Párhuzamos módosítás",
+                "Az adatot másik művelet módosítja. Próbálja újra a kérést.");
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ProblemDetail handleServiceValidation(ConstraintViolationException exception) {
+        ProblemDetail detail = problem(HttpStatus.BAD_REQUEST, "validacios-hiba", "Érvénytelen kérés",
+                "Egy vagy több paraméter értéke érvénytelen.");
+        detail.setProperty("errors", exception.getConstraintViolations().stream().map(v ->
+                new FieldViolation(v.getPropertyPath().toString(), v.getMessage())).toList());
+        return detail;
+    }
+
     public record FieldViolation(String field, String message) {
     }
 
@@ -50,7 +86,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         // A párhuzamos kérések az előzetes ellenőrzésen egyszerre is átjuthatnak.
         // Az adatbázis-kényszer hibájából nem küldünk SQL-t vagy belső részleteket a kliensnek.
         return problem(HttpStatus.CONFLICT, "adatbazis-utkozes", "Adatütközés",
-                "Az adatok ütköznek egy adatbázis-korlátozással. Az e-mail-cím és a felhasználónév legyen egyedi.");
+                "Az adatok ütköznek egy egyediségi vagy hivatkozási adatbázis-korlátozással.");
     }
 
     @ExceptionHandler(HibasKeresException.class)
