@@ -4,6 +4,7 @@ import hu.unideb.inf.kiadaskezelo.data.entity.FelhasznaloEntity;
 import hu.unideb.inf.kiadaskezelo.data.repository.FelhasznaloRepository;
 import hu.unideb.inf.kiadaskezelo.service.FelhasznaloMegjelenitoService;
 import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloDisplayDto;
+import hu.unideb.inf.kiadaskezelo.service.exception.HibasKeresException;
 import hu.unideb.inf.kiadaskezelo.service.mapper.FelhasznaloMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,10 @@ public class FelhasznaloMegjelenitoServiceImpl
 
     @Override
     public List<FelhasznaloDisplayDto> findAllFelhasznalo() {
+        List<FelhasznaloEntity> entities = repo.findAll();
+        if(entities.isEmpty()) {
+            throw new HibasKeresException("Hibás, mert én azt mondtam");
+        }
         return mapper.fEntityListToDtoList(repo.findAll());
     }
 
