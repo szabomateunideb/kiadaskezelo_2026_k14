@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.GrantedAuthority;
 
 @Getter
 @Setter
@@ -12,7 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "JOGOSULTSAG")
-public class JogEntity extends AuditEntity {
+public class JogEntity
+        extends AuditEntity
+        implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,4 +24,9 @@ public class JogEntity extends AuditEntity {
     private String nev;
     @Column
     private String leiras;
+
+    @Override
+    public @Nullable String getAuthority() {
+        return nev;
+    }
 }
