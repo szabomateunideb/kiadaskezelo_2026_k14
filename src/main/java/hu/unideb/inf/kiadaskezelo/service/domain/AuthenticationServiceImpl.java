@@ -8,6 +8,12 @@ import hu.unideb.inf.kiadaskezelo.service.AuthenticationService;
 import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloCreateRequest;
 import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloLoginRequest;
 import hu.unideb.inf.kiadaskezelo.service.mapper.FelhasznaloMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,11 +22,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final FelhasznaloRepository frepo;
     private final JogRepository jrepo;
     private final FelhasznaloMapper fmapper;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthenticationServiceImpl(FelhasznaloRepository frepo, JogRepository jrepo, FelhasznaloMapper fmapper) {
+    public AuthenticationServiceImpl(FelhasznaloRepository frepo, JogRepository jrepo, FelhasznaloMapper fmapper, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder) {
         this.frepo = frepo;
         this.jrepo = jrepo;
         this.fmapper = fmapper;
+        this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -37,11 +47,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             f.setJog(j);
         }
+        f.setJelszo(passwordEncoder.encode(f.getJelszo()));
         frepo.save(f);
     }
 
     @Override
     public void bejelentkezes(FelhasznaloLoginRequest dto) {
-
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        dto.felhasznalonev(),dto.jelszo()
+                )
+        );
+        context.setAuthentication(auth);
     }
 }

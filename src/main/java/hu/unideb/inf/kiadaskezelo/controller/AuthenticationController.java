@@ -2,6 +2,7 @@ package hu.unideb.inf.kiadaskezelo.controller;
 
 import hu.unideb.inf.kiadaskezelo.service.AuthenticationService;
 import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloCreateRequest;
+import hu.unideb.inf.kiadaskezelo.service.dto.FelhasznaloLoginRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,5 +24,10 @@ public class AuthenticationController {
             @Valid
             @RequestBody FelhasznaloCreateRequest dto) {
         auth.regisztracio(dto);
+    }
+
+    @PostMapping("/bejelentkezes")
+    public void bejelentkezes(@RequestBody FelhasznaloLoginRequest dto){
+        auth.bejelentkezes(dto);
     }
 }
