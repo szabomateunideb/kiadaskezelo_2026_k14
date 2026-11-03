@@ -15,12 +15,14 @@ public interface FelhasznaloMapper {
     @Mapping(target = "jogNev", source = "jog.nev")
     FelhasznaloResponse toResponse(FelhasznaloEntity entity);
 
+    @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "jog", ignore = true)
     @Mapping(target = "aktiv", ignore = true)
     @Mapping(target = "emailEllenorizve", ignore = true)
     FelhasznaloEntity toEntity(FelhasznaloCreateRequest request);
 
+    @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "jog", ignore = true)
     @Mapping(target = "jelszo", ignore = true)
