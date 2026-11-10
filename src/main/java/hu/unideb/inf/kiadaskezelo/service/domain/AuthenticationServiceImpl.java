@@ -24,13 +24,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final FelhasznaloMapper fmapper;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
-    public AuthenticationServiceImpl(FelhasznaloRepository frepo, JogRepository jrepo, FelhasznaloMapper fmapper, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder) {
+    public AuthenticationServiceImpl(FelhasznaloRepository frepo, JogRepository jrepo, FelhasznaloMapper fmapper, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, TokenService tokenService) {
         this.frepo = frepo;
         this.jrepo = jrepo;
         this.fmapper = fmapper;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -52,7 +54,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public void bejelentkezes(FelhasznaloLoginRequest dto) {
+    public String bejelentkezes(FelhasznaloLoginRequest dto) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -60,5 +62,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 )
         );
         context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+
+        var user = frepo.findByFelhasznalonev(dto.felhasznalonev());
+        return tokenService.generateToken(user.get());
     }
 }

@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class TokenService {
 
     private SecretKey getSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode("hkgjkfgjsdjkfsklfjesklfjslkefjlsejfsfnsfn");
+        byte[] keyBytes = Decoders.BASE64.decode("hkgjkfgjsdjkfsklfjesklfjslkefjlsejfsfnsfnfjxvxfjkvnxdjkvnyxdkjvnxjkdvnxjkdvnxdjkvnxdjk");
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -46,7 +46,7 @@ public class TokenService {
         return Jwts.builder()
                 .claims(claims)
                 .subject(user.getUsername())
-                .issuedAt(Calendar.getInstance().getTime())
+                .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis()+150000))
                 .signWith(getSecretKey())
                 .compact();

@@ -27,7 +27,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/bejelentkezes")
-    public void bejelentkezes(@RequestBody FelhasznaloLoginRequest dto){
-        auth.bejelentkezes(dto);
+    public String bejelentkezes(@RequestBody FelhasznaloLoginRequest dto){
+        return auth.bejelentkezes(dto);
     }
 }
