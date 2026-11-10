@@ -1,11 +1,17 @@
 package hu.unideb.inf.kiadaskezelo.service.domain;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.jackson.io.JacksonDeserializer;
+import io.jsonwebtoken.jackson.io.JacksonSerializer;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ser.jackson.JacksonSerializableSerializer;
+
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -25,7 +31,12 @@ public class TokenService {
 
     private <T> T extractClaim(String token,
                                Function<Claims, T> claimsResolver) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         final Claims claims = Jwts.parser()
+                .json(new JacksonDeserializer<>(objectMapper))
+
                 .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token)
@@ -39,11 +50,15 @@ public class TokenService {
     }
 
     public String generateToken(UserDetails user) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
         Map<String, Object> claims = new HashMap<>();
         user.getAuthorities().forEach(a ->
                 claims.put(a.getAuthority(),a));
 
         return Jwts.builder()
+                .json(new JacksonSerializer<>(objectMapper))
                 .claims(claims)
                 .subject(user.getUsername())
                 .issuedAt(new Date())
